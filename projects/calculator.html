@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simple Calculator (C++) — Omkar Raju</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;0,600;1,500&family=Work+Sans:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #211219;
+  --surface: #2c1a23;
+  --surface-hover: #35202b;
+  --text: #f3ece7;
+  --text-muted: #c9b8bf;
+  --accent: #9cb38b;
+  --accent-soft: #445039;
+  --cta: #ff6b45;
+  --cta-hover: #ff8163;
+  --border: #402734;
+  --font-display: 'Newsreader', Georgia, serif;
+  --font-body: 'Work Sans', system-ui, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-body); line-height: 1.6; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.2; }
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; }
+section { padding: 88px 8vw; max-width: 1100px; margin: 0 auto; }
+
+.section-head { margin-bottom: 36px; }
+.section-head .eyebrow { margin-bottom: 8px; }
+.section-head h2 { font-size: 2rem; }
+.section-head p { color: var(--text-muted); margin-top: 8px; max-width: 55ch; }
+.eyebrow { color: var(--accent); font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; }
+
+.pill { display: inline-block; padding: 4px 12px; border: 1px solid var(--border); border-radius: 999px; font-size: 0.82rem; color: var(--text-muted); }
+
+/* Navbar */
+header { position: sticky; top: 0; background: rgba(33, 18, 25, 0.92); backdrop-filter: blur(6px); border-bottom: 1px solid var(--border); z-index: 10; }
+nav { display: flex; justify-content: space-between; align-items: center; padding: 18px 8vw; max-width: 1100px; margin: 0 auto; }
+.logo { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; }
+.nav-links { display: flex; gap: 28px; }
+.nav-links a { font-size: 0.92rem; color: var(--text-muted); transition: color 0.2s ease; }
+.nav-links a:hover { color: var(--accent); }
+
+/* Buttons */
+.btn { padding: 12px 26px; border-radius: 6px; font-size: 0.95rem; font-weight: 500; display: inline-block; transition: transform 0.2s ease, background 0.2s ease; }
+.btn-primary { background: var(--cta); color: #1a0e10; border: none; cursor: pointer; }
+.btn-primary:hover { background: var(--cta-hover); transform: translateY(-3px); }
+.btn-secondary { border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: var(--accent); transform: translateY(-3px); }
+
+/* Hero */
+.hero { padding-top: 110px; padding-bottom: 80px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 56px; align-items: center; animation: fade-in-up 0.7s ease both; }
+.hero h1 { font-size: clamp(2.4rem, 5vw, 3.6rem); margin-top: 14px; }
+.hero-role { font-size: 1.3rem; color: var(--text-muted); margin-top: 12px; }
+.hero-text { max-width: 52ch; margin-top: 20px; color: var(--text-muted); }
+.hero-buttons { display: flex; gap: 16px; margin-top: 34px; flex-wrap: wrap; }
+
+.profile-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; }
+.avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 1.6rem; margin-bottom: 20px; }
+.profile-card dl { display: grid; gap: 14px; }
+.profile-card dt { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.profile-card dd { color: var(--text); font-size: 0.95rem; }
+
+@keyframes fade-in-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Stats */
+.stats { padding-top: 0; padding-bottom: 40px; }
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.stat { padding: 28px; text-align: center; border-right: 1px solid var(--border); }
+.stat:last-child { border-right: none; }
+.stat strong { display: block; font-family: var(--font-display); font-size: 2.4rem; color: var(--accent); line-height: 1; }
+.stat span { color: var(--text-muted); font-size: 0.9rem; }
+
+/* About */
+.about-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 48px; }
+.about-grid p { color: var(--text-muted); margin-bottom: 16px; max-width: 62ch; }
+.about-side h3 { font-size: 1.05rem; margin-bottom: 14px; color: var(--accent); }
+.pill-row { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* Cards */
+.skills-grid, .learning-grid, .projects-grid { display: grid; gap: 22px; }
+.skills-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.learning-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.projects-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 28px; }
+.card h3 { font-size: 1.15rem; margin-bottom: 10px; }
+.card p { color: var(--text-muted); font-size: 0.95rem; }
+.skill-card h3 { color: var(--accent); }
+.skill-card .pill-row { margin-top: 6px; }
+
+.step-num { font-family: var(--font-display); font-size: 1.8rem; color: var(--accent); display: block; margin-bottom: 8px; }
+
+/* Projects */
+.project-card { display: flex; flex-direction: column; gap: 12px; transition: transform 0.2s ease, background 0.2s ease; }
+.project-card:hover { transform: translateY(-6px); background: var(--surface-hover); }
+.project-card h4 { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-top: 4px; }
+.practiced { display: grid; gap: 6px; }
+.practiced li { color: var(--text-muted); font-size: 0.9rem; padding-left: 18px; position: relative; }
+.practiced li::before { content: ""; position: absolute; left: 0; top: 0.65em; width: 8px; height: 2px; background: var(--accent); }
+.project-links { display: flex; gap: 18px; margin-top: auto; padding-top: 10px; }
+.project-links a { font-size: 0.9rem; border-bottom: 1px solid var(--accent); }
+
+/* Timeline */
+.timeline { border-left: 2px solid var(--border); margin-left: 8px; }
+.timeline-item { position: relative; padding: 0 0 36px 32px; }
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-item::before { content: ""; position: absolute; left: -9px; top: 6px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 3px solid var(--bg); }
+.timeline-item h3 { font-size: 1.2rem; }
+.timeline-item .meta { color: var(--accent); font-size: 0.85rem; margin: 4px 0 8px; }
+.timeline-item p { color: var(--text-muted); max-width: 60ch; }
+
+/* Contact */
+.contact-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 48px; align-items: start; }
+.contact-info p { color: var(--text-muted); margin-bottom: 24px; max-width: 42ch; }
+.contact-links { display: grid; gap: 12px; }
+.contact-links a { display: flex; justify-content: space-between; padding: 14px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; transition: border-color 0.2s ease; }
+.contact-links a:hover { border-color: var(--accent); }
+.contact-links span { color: var(--accent); font-size: 0.85rem; }
+
+.contact-form { display: flex; flex-direction: column; gap: 14px; }
+.contact-form label { font-size: 0.85rem; color: var(--text-muted); }
+.contact-form input, .contact-form textarea { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; color: var(--text); font-family: var(--font-body); font-size: 0.95rem; }
+.contact-form input:focus, .contact-form textarea:focus { outline: none; border-color: var(--accent); }
+.contact-form button { align-self: flex-start; margin-top: 6px; }
+
+/* Footer */
+footer { border-top: 1px solid var(--border); padding: 40px 8vw; }
+.footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; color: var(--text-muted); font-size: 0.88rem; }
+.footer-links { display: flex; gap: 22px; }
+.footer-links a:hover { color: var(--accent); }
+
+/* Responsive */
+@media (max-width: 800px) {
+  .hero, .about-grid, .contact-grid { grid-template-columns: 1fr; gap: 32px; }
+  .hero { padding-top: 70px; }
+}
+@media (max-width: 640px) {
+  nav { padding: 16px 6vw; }
+  .nav-links { gap: 16px; }
+  .nav-links a { font-size: 0.82rem; }
+  section { padding: 60px 6vw; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .stat { border-right: none; border-bottom: 1px solid var(--border); }
+  .stat:last-child { border-bottom: none; }
+}
+
+/* ===== Theme 4: Dark Navy & Cyan ===== */
+:root {
+  --bg: #071426;
+  --surface: #0d2038;
+  --surface-hover: #122b49;
+  --text: #eaf6ff;
+  --text-muted: #a8bfd3;
+  --accent: #22d3ee;
+  --accent-soft: #123b52;
+  --cta: #06b6d4;
+  --cta-hover: #22d3ee;
+  --border: #1c3b57;
+  --font-display: 'Newsreader', Georgia, serif;
+  --font-body: 'Work Sans', system-ui, sans-serif;
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 15% 0%, rgba(6, 182, 212, 0.09), transparent 35%),
+    var(--bg);
+  color: var(--text);
+}
+
+header {
+  background: rgba(7, 20, 38, 0.94);
+  border-bottom-color: var(--border);
+}
+
+.logo,
+.nav-links a:hover,
+.footer-links a:hover {
+  color: var(--accent);
+}
+
+.btn-primary {
+  background: var(--cta);
+  color: #04111f;
+  border: 1px solid var(--cta);
+}
+
+.btn-primary:hover {
+  background: var(--cta-hover);
+  box-shadow: 0 8px 24px rgba(34, 211, 238, 0.18);
+}
+
+.btn-secondary {
+  border-color: #2b526e;
+  color: var(--text);
+  background: transparent;
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.profile-card,
+.card,
+.stats-grid,
+.contact-links a {
+  background: linear-gradient(145deg, rgba(15, 37, 62, 0.98), rgba(9, 27, 48, 0.98));
+  border-color: var(--border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+}
+
+.avatar {
+  background: linear-gradient(135deg, #0891b2, #22d3ee);
+  color: #04111f;
+}
+
+.stat strong,
+.section-head .eyebrow,
+.about-side h3,
+.skill-card h3,
+.step-num,
+.project-card h4,
+.profile-card dt,
+.timeline-item .meta,
+.contact-links span {
+  color: var(--accent);
+}
+
+.pill {
+  background: rgba(34, 211, 238, 0.09);
+  border-color: #24516b;
+  color: #b9f4ff;
+}
+
+.project-card:hover {
+  background: var(--surface-hover);
+  border-color: #28718b;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.2);
+}
+
+.project-links a {
+  border-bottom-color: var(--accent);
+  color: var(--accent);
+}
+
+.timeline-item::before {
+  border-color: var(--bg);
+}
+
+.contact-links a:hover {
+  border-color: var(--accent);
+  background: #102943;
+}
+
+.contact-form input,
+.contact-form textarea {
+  background: #081a2d;
+  border-color: #25445f;
+  color: var(--text);
+}
+
+.contact-form input::placeholder,
+.contact-form textarea::placeholder {
+  color: #7894ab;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.12);
+}
+
+footer {
+  background: #061120;
+  border-top-color: var(--border);
+}
+
+@media (max-width: 640px) {
+  .nav-links {
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+
+
+/* ===== Project page additions ===== */
+.project-hero { padding-top: 70px; padding-bottom: 56px; }
+.back-link { display: inline-block; color: var(--accent); font-size: 0.9rem; margin-bottom: 20px; }
+.back-link:hover { text-decoration: underline; }
+.stack { display: grid; gap: 22px; }
+.code-card { padding: 0; overflow: hidden; }
+.code-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 24px 28px 0; }
+.code-head h3 { margin: 0; }
+.code-card > p { padding: 10px 28px 0; }
+.code-card pre { margin: 20px 0 0; padding: 22px 28px; background: #061120; border-top: 1px solid var(--border); overflow-x: auto; font-size: 0.85rem; line-height: 1.65; color: #d7ecf7; }
+.code-card code { font-family: ui-monospace, 'Courier New', monospace; }
+.snippet { margin-top: 24px; }
+.page-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.page-nav a.card { display: block; transition: transform 0.2s ease, border-color 0.2s ease; }
+.page-nav a.card:hover { transform: translateY(-4px); border-color: var(--accent); }
+.page-nav small { display: block; color: var(--accent); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+.page-nav h3 { margin: 0; }
+.page-nav .next { text-align: right; }
+
+/* demo (landing page project) */
+.demo-frame { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg); }
+.demo-nav { display: flex; justify-content: space-between; align-items: center; padding: 18px 6%; border-bottom: 1px solid var(--border); }
+.demo-nav .demo-logo { font-family: var(--font-display); font-weight: 600; font-size: 1.1rem; }
+.demo-nav-links { display: flex; gap: 22px; }
+.demo-nav-links a { font-size: 0.88rem; color: var(--text-muted); }
+.demo-hero { padding: 60px 6%; text-align: center; }
+.demo-hero h3 { font-size: 2rem; max-width: 20ch; margin: 0 auto 14px; }
+.demo-hero p { color: var(--text-muted); max-width: 46ch; margin: 0 auto 24px; }
+.demo-features { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; padding: 8px 6% 48px; }
+.demo-feature { border: 1px solid var(--border); border-radius: 10px; padding: 22px; text-align: center; background: var(--surface); }
+.demo-feature h4 { font-family: var(--font-display); font-size: 1.05rem; margin-bottom: 6px; }
+.demo-feature p { color: var(--text-muted); font-size: 0.9rem; }
+
+@media (max-width: 640px) {
+  .page-nav { grid-template-columns: 1fr; }
+  .page-nav .next { text-align: left; }
+  .project-hero { padding-top: 50px; }
+  .demo-nav-links { gap: 12px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <a href="../index.html" class="logo">OR</a>
+    <ul class="nav-links">
+      <li><a href="../index.html#about">About</a></li>
+      <li><a href="../index.html#skills">Skills</a></li>
+      <li><a href="../index.html#projects">Projects</a></li>
+      <li><a href="../index.html#education">Education</a></li>
+      <li><a href="../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+
+  <section class="hero project-hero">
+    <div>
+      <a href="../index.html#projects" class="back-link">&larr; Back to Projects</a>
+      <p class="eyebrow">Project 03</p>
+      <h1>Simple Calculator (C++)</h1>
+      <p class="hero-text">A console-based calculator that handles basic arithmetic. I built it to practice C++ fundamentals like switch statements, user input, and error handling.</p>
+      <div class="hero-buttons">
+        <a href="#code" class="btn btn-primary">View Source Code</a>
+        <a href="https://github.com/Omkar25802580" class="btn btn-secondary">GitHub</a>
+      </div>
+    </div>
+    <aside class="profile-card">
+      <div class="avatar">03</div>
+      <dl>
+        <div><dt>Type</dt><dd>Console application</dd></div>
+        <div><dt>Language</dt><dd>C++</dd></div>
+        <div><dt>Concepts</dt><dd>Switch statements, input, error handling</dd></div>
+        <div><dt>Runs in</dt><dd>The terminal</dd></div>
+      </dl>
+    </aside>
+  </section>
+
+  <section id="code">
+    <div class="section-head">
+      <p class="eyebrow">Source code</p>
+      <h2>The full program</h2>
+      <p>This runs in a terminal, not a browser, so the code below is the whole project.</p>
+    </div>
+    <article class="card code-card">
+      <div class="code-head"><h3>calculator.cpp</h3><div class="pill-row"><span class="pill">C++</span></div></div>
+<pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    double a, b;
+    char op;
+
+    cout &lt;&lt; "Enter expression (e.g. 5 + 3): ";
+    cin &gt;&gt; a &gt;&gt; op &gt;&gt; b;
+
+    double result;
+    switch (op) {
+        case '+': result = a + b; break;
+        case '-': result = a - b; break;
+        case '*': result = a * b; break;
+        case '/':
+            if (b == 0) {
+                cout &lt;&lt; "Error: division by zero" &lt;&lt; endl;
+                return 1;
+            }
+            result = a / b;
+            break;
+        default:
+            cout &lt;&lt; "Error: unknown operator" &lt;&lt; endl;
+            return 1;
+    }
+
+    cout &lt;&lt; "Result: " &lt;&lt; result &lt;&lt; endl;
+    return 0;
+}</code></pre>
+    </article>
+  </section>
+
+  <section id="how">
+    <div class="section-head">
+      <p class="eyebrow">How it works</p>
+      <h2>Three steps</h2>
+    </div>
+    <div class="learning-grid">
+      <div class="card"><span class="step-num">01</span><h3>Read the input</h3><p>The program reads two numbers and an operator in one line using <code>cin</code>.</p></div>
+      <div class="card"><span class="step-num">02</span><h3>Pick the operation</h3><p>A <code>switch</code> statement chooses +, -, * or / based on the operator character.</p></div>
+      <div class="card"><span class="step-num">03</span><h3>Handle errors</h3><p>Dividing by zero or entering an unknown operator prints an error and exits.</p></div>
+    </div>
+  </section>
+
+  <section id="run">
+    <div class="section-head">
+      <p class="eyebrow">Try it</p>
+      <h2>Compile and run</h2>
+    </div>
+    <div class="stack">
+      <article class="card code-card">
+        <div class="code-head"><h3>Build it</h3><div class="pill-row"><span class="pill">Terminal</span></div></div>
+<pre><code>g++ calculator.cpp -o calculator
+./calculator</code></pre>
+      </article>
+      <article class="card code-card">
+        <div class="code-head"><h3>Sample run</h3><div class="pill-row"><span class="pill">Output</span></div></div>
+<pre><code>Enter expression (e.g. 5 + 3): 12 / 4
+Result: 3</code></pre>
+      </article>
+    </div>
+  </section>
+
+  <section id="more">
+    <div class="page-nav">
+      <a href="landing-page.html" class="card"><small>&larr; Previous project</small><h3>Responsive Landing Page</h3></a>
+      <a href="../index.html#projects" class="card next"><small>Back to &rarr;</small><h3>All Projects</h3></a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <p>&copy; 2026 Omkar Raju &middot; Built with HTML &amp; CSS</p>
+    <div class="footer-links">
+      <a href="../index.html#about">About</a>
+      <a href="../index.html#projects">Projects</a>
+      <a href="../index.html#contact">Contact</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
